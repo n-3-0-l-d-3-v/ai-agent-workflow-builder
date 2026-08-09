@@ -1,8 +1,8 @@
 import { NhostHandler } from '../types';
 import { gql } from '../lib/hasura';
 import { requireUserId, requireOrgRole, AuthError } from '../lib/auth';
-import { assertQuotaAvailable, QuotaExceededError } from '../lib/quota';
-import { executeRun } from '../lib/runEngine';
+import { QuotaExceededError } from '../lib/quota';
+import { startRun } from '../lib/startRun';
 
 interface WorkflowRow {
   id: string;
@@ -42,26 +42,13 @@ const handler: NhostHandler = async (req, res) => {
     }
 
     await requireOrgRole(workflow.org_id, userId, ['owner', 'editor']);
-    await assertQuotaAvailable(workflow.org_id);
 
-    const insertResult = await gql<{ insert_workflow_runs_one: { id: string } }>(
-      `mutation ($object: workflow_runs_insert_input!) {
-        insert_workflow_runs_one(object: $object) { id }
-      }`,
-      {
-        object: {
-          workflow_id: workflow.id,
-          org_id: workflow.org_id,
-          status: 'pending',
-          trigger_type: 'manual',
-          triggered_by: userId,
-          trigger_context: {},
-        },
-      }
-    );
-
-    const runId = insertResult.insert_workflow_runs_one.id;
-    const { status } = await executeRun(runId);
+    const { runId, status } = await startRun({
+      workflowId: workflow.id,
+      orgId: workflow.org_id,
+      triggerType: 'manual',
+      triggeredBy: userId,
+    });
 
     res.status(200).json({ workflow_run_id: runId, status });
   } catch (err) {
