@@ -1,0 +1,29 @@
+table:
+  schema: public
+  name: workflow_outputs
+object_relationships:
+  - name: workflow_run
+    using:
+      foreign_key_constraint_on: workflow_run_id
+  - name: step_run
+    using:
+      foreign_key_constraint_on: step_run_id
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - org_id
+        - workflow_run_id
+        - step_run_id
+        - key
+        - value
+        - created_at
+      filter:
+        _exists:
+          _table: { schema: public, name: org_members }
+          _where:
+            _and:
+              - org_id: { _ceq: org_id }
+              - user_id: { _eq: X-Hasura-User-Id }
+# Written only by the db_write step handler via admin secret.

@@ -1,6 +1,30 @@
-actions: []
+actions:
+  - name: triggerWorkflowRun
+    definition:
+      kind: synchronous
+      handler: "{{ACTIONS_BASE_URL}}/triggerWorkflowRun"
+      forward_client_headers: true
+      headers:
+        - name: x-hasura-admin-secret
+          value_from_env: HASURA_GRAPHQL_ADMIN_SECRET
+    permissions:
+      - role: user
+  - name: approveStep
+    definition:
+      kind: synchronous
+      handler: "{{ACTIONS_BASE_URL}}/approveStep"
+      forward_client_headers: true
+      headers:
+        - name: x-hasura-admin-secret
+          value_from_env: HASURA_GRAPHQL_ADMIN_SECRET
+    permissions:
+      - role: user
 custom_types:
-    enums: []
-    input_objects: []
-    objects: []
-    scalars: []
+  enums: []
+  input_objects:
+    - name: TriggerWorkflowRunInput
+    - name: ApproveStepInput
+  objects:
+    - name: TriggerWorkflowRunOutput
+    - name: ApproveStepOutput
+  scalars: []

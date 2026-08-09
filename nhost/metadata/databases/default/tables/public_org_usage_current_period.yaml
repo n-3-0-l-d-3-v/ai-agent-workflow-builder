@@ -1,0 +1,25 @@
+table:
+  schema: public
+  name: org_usage_current_period
+configuration:
+  custom_root_fields: {}
+  custom_column_names: {}
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - org_id
+        - quota_period_start
+        - quota_calls_allowed
+        - quota_calls_used
+        - quota_calls_remaining
+        - runs_this_period
+        - failed_runs_this_period
+        - avg_run_duration_seconds
+      filter:
+        _exists:
+          _table: { schema: public, name: org_members }
+          _where:
+            _and:
+              - org_id: { _ceq: org_id }
+              - user_id: { _eq: X-Hasura-User-Id }

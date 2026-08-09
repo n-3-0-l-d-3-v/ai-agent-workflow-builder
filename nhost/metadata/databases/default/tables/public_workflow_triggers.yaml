@@ -1,0 +1,99 @@
+table:
+  schema: public
+  name: workflow_triggers
+object_relationships:
+  - name: workflow
+    using:
+      foreign_key_constraint_on: workflow_id
+select_permissions:
+  - role: user
+    permission:
+      # NB: config (which can hold a webhook_secret) is visible to any org
+      # member here — Hasura only allows one select permission per role, so
+      # the secret can't be column-masked per sub-role in this layer. The
+      # actual security boundary for the webhook endpoint is the HMAC
+      # signature check in functions/actions/triggerWorkflowRunWebhook.ts,
+      # not obscuring the secret from teammates who can already see the
+      # workflow. See docs/write-up.md.
+      columns:
+        - id
+        - workflow_id
+        - org_id
+        - type
+        - config
+        - is_enabled
+        - created_at
+        - updated_at
+      filter:
+        _exists:
+          _table: { schema: public, name: org_members }
+          _where:
+            _and:
+              - org_id: { _ceq: org_id }
+              - user_id: { _eq: X-Hasura-User-Id }
+insert_permissions:
+  - role: user
+    permission:
+      # layer 2: only an owner may attach a webhook trigger — it's an
+      # inbound endpoint external systems can call to start runs.
+      check:
+        _and:
+          - _exists:
+              _table: { schema: public, name: org_members }
+              _where:
+                _and:
+                  - org_id: { _ceq: org_id }
+                  - user_id: { _eq: X-Hasura-User-Id }
+                  - role: { _in: [owner, editor] }
+          - _or:
+              - type: { _neq: webhook }
+              - _exists:
+                  _table: { schema: public, name: org_members }
+                  _where:
+                    _and:
+                      - org_id: { _ceq: org_id }
+                      - user_id: { _eq: X-Hasura-User-Id }
+                      - role: { _eq: owner }
+      columns:
+        - workflow_id
+        - org_id
+        - type
+        - config
+        - is_enabled
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - type
+        - config
+        - is_enabled
+      filter:
+        _and:
+          - _exists:
+              _table: { schema: public, name: org_members }
+              _where:
+                _and:
+                  - org_id: { _ceq: org_id }
+                  - user_id: { _eq: X-Hasura-User-Id }
+                  - role: { _in: [owner, editor] }
+          - _or:
+              - type: { _neq: webhook }
+              - _exists:
+                  _table: { schema: public, name: org_members }
+                  _where:
+                    _and:
+                      - org_id: { _ceq: org_id }
+                      - user_id: { _eq: X-Hasura-User-Id }
+                      - role: { _eq: owner }
+      check: null
+delete_permissions:
+  - role: user
+    permission:
+      filter:
+        _exists:
+          _table: { schema: public, name: org_members }
+          _where:
+            _and:
+              - org_id: { _ceq: org_id }
+              - user_id: { _eq: X-Hasura-User-Id }
+              - role: { _in: [owner, editor] }

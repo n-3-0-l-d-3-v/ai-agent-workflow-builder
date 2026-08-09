@@ -1,0 +1,19 @@
+input TriggerWorkflowRunInput {
+  workflow_id: uuid!
+}
+
+type TriggerWorkflowRunOutput {
+  workflow_run_id: uuid!
+  status: String!
+}
+
+input ApproveStepInput {
+  step_run_id: uuid!
+  decision: String!
+}
+
+type ApproveStepOutput {
+  step_run_id: uuid!
+  workflow_run_id: uuid!
+  status: String!
+}

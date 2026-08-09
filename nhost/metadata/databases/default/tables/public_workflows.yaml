@@ -1,0 +1,101 @@
+table:
+  schema: public
+  name: workflows
+object_relationships:
+  - name: organization
+    using:
+      foreign_key_constraint_on: org_id
+array_relationships:
+  - name: steps
+    using:
+      foreign_key_constraint_on:
+        column: workflow_id
+        table:
+          schema: public
+          name: workflow_steps
+  - name: triggers
+    using:
+      foreign_key_constraint_on:
+        column: workflow_id
+        table:
+          schema: public
+          name: workflow_triggers
+  - name: runs
+    using:
+      foreign_key_constraint_on:
+        column: workflow_id
+        table:
+          schema: public
+          name: workflow_runs
+computed_fields:
+  - name: avg_duration_seconds
+    definition:
+      function:
+        schema: public
+        name: workflow_avg_duration_seconds
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - org_id
+        - name
+        - description
+        - is_active
+        - created_by
+        - created_at
+        - updated_at
+      computed_fields:
+        - avg_duration_seconds
+      filter:
+        _exists:
+          _table: { schema: public, name: org_members }
+          _where:
+            _and:
+              - org_id: { _ceq: org_id }
+              - user_id: { _eq: X-Hasura-User-Id }
+insert_permissions:
+  - role: user
+    permission:
+      check:
+        _exists:
+          _table: { schema: public, name: org_members }
+          _where:
+            _and:
+              - org_id: { _ceq: org_id }
+              - user_id: { _eq: X-Hasura-User-Id }
+              - role: { _in: [owner, editor] }
+      columns:
+        - org_id
+        - name
+        - description
+        - is_active
+      set:
+        created_by: x-hasura-User-Id
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - name
+        - description
+        - is_active
+      filter:
+        _exists:
+          _table: { schema: public, name: org_members }
+          _where:
+            _and:
+              - org_id: { _ceq: org_id }
+              - user_id: { _eq: X-Hasura-User-Id }
+              - role: { _in: [owner, editor] }
+      check: null
+delete_permissions:
+  - role: user
+    permission:
+      filter:
+        _exists:
+          _table: { schema: public, name: org_members }
+          _where:
+            _and:
+              - org_id: { _ceq: org_id }
+              - user_id: { _eq: X-Hasura-User-Id }
+              - role: { _eq: owner }
