@@ -1,0 +1,11 @@
+{
+  "name": "ai-agent-workflow-builder-functions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hasura Action / Event Trigger / Cron handlers for the workflow run engine. Deliberately dependency-free (Node 18+ fetch/crypto only) so cold starts stay fast and there is no npm supply chain to audit for what's a handful of HTTP calls.",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}
