@@ -1,6 +1,7 @@
 import { NhostHandler } from '../types';
 import { gql } from '../lib/hasura';
 import { startRun } from '../lib/startRun';
+import { parseJsonBody } from '../lib/parseBody';
 
 interface HasuraEventPayload {
   event: { op: string; data: { new: Record<string, unknown> } };
@@ -22,7 +23,7 @@ interface MatchingTrigger {
  * lead created in Org A can never fire a workflow belonging to Org B.
  */
 const handler: NhostHandler = async (req, res) => {
-  const payload = req.body as HasuraEventPayload;
+  const payload = parseJsonBody(req.body) as HasuraEventPayload;
   const lead = payload?.event?.data?.new;
 
   if (!lead || payload.event.op !== 'INSERT') {

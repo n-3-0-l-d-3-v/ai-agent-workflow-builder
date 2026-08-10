@@ -51,14 +51,23 @@ const handler: NhostHandler = async (req, res) => {
 
     const secret = trigger.config?.webhook_secret;
     const signature = req.headers['x-webhook-signature'];
-    const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body ?? {});
+    // The signature must be verified against the exact bytes the caller
+    // signed -- reconstructing/re-stringifying a parsed body would produce
+    // a different byte sequence (key order, whitespace) and break
+    // legitimate signatures, so this only ever trusts a true raw string/
+    // Buffer, never JSON.stringify(alreadyParsedObject).
+    const rawBody = Buffer.isBuffer(req.body)
+      ? req.body.toString('utf8')
+      : typeof req.body === 'string'
+        ? req.body
+        : JSON.stringify(req.body ?? {});
 
     if (!secret || !verifyWebhookSignature(rawBody, secret, Array.isArray(signature) ? signature[0] : signature)) {
       res.status(401).json({ message: 'invalid signature' });
       return;
     }
 
-    const payload = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body ?? {};
+    const payload = rawBody ? JSON.parse(rawBody) : {};
 
     const { runId, status } = await startRun({
       workflowId: trigger.workflow_id,

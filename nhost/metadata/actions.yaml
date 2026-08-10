@@ -2,7 +2,7 @@ actions:
   - name: approveStep
     definition:
       kind: synchronous
-      handler: '{{NHOST_FUNCTIONS_URL}}/approveStep'
+      handler: '{{NHOST_FUNCTIONS_URL}}/actions/approveStep'
       forward_client_headers: true
       headers:
         - name: x-hasura-admin-secret
@@ -12,7 +12,7 @@ actions:
   - name: triggerWorkflowRun
     definition:
       kind: synchronous
-      handler: '{{NHOST_FUNCTIONS_URL}}/triggerWorkflowRun'
+      handler: '{{NHOST_FUNCTIONS_URL}}/actions/triggerWorkflowRun'
       forward_client_headers: true
       headers:
         - name: x-hasura-admin-secret

@@ -3,6 +3,7 @@ import { gql } from '../lib/hasura';
 import { requireUserId, requireOrgRole, AuthError } from '../lib/auth';
 import { QuotaExceededError } from '../lib/quota';
 import { startRun } from '../lib/startRun';
+import { parseJsonBody } from '../lib/parseBody';
 
 interface WorkflowRow {
   id: string;
@@ -22,8 +23,9 @@ interface WorkflowRow {
  */
 const handler: NhostHandler = async (req, res) => {
   try {
-    const sessionVariables = req.body?.session_variables ?? {};
-    const workflowId: string | undefined = req.body?.input?.workflow_id;
+    const body = parseJsonBody(req.body);
+    const sessionVariables = body.session_variables ?? {};
+    const workflowId: string | undefined = body.input?.workflow_id;
     if (!workflowId) {
       res.status(400).json({ message: 'workflow_id is required' });
       return;

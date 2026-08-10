@@ -2,6 +2,7 @@ import { NhostHandler } from '../types';
 import { gql } from '../lib/hasura';
 import { requireUserId, requireOrgRole, AuthError } from '../lib/auth';
 import { executeRun } from '../lib/runEngine';
+import { parseJsonBody } from '../lib/parseBody';
 
 interface StepRunRow {
   id: string;
@@ -22,9 +23,10 @@ interface StepRunRow {
  */
 const handler: NhostHandler = async (req, res) => {
   try {
-    const sessionVariables = req.body?.session_variables ?? {};
-    const stepRunId: string | undefined = req.body?.input?.step_run_id;
-    const decision: string | undefined = req.body?.input?.decision;
+    const body = parseJsonBody(req.body);
+    const sessionVariables = body.session_variables ?? {};
+    const stepRunId: string | undefined = body.input?.step_run_id;
+    const decision: string | undefined = body.input?.decision;
 
     if (!stepRunId || !decision || !['approve', 'reject'].includes(decision)) {
       res.status(400).json({ message: 'step_run_id and decision ("approve"|"reject") are required' });
