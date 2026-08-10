@@ -88,6 +88,19 @@ export const DELETE_STEP_MUTATION = `
   }
 `;
 
+// Swaps two steps' step_order via a temporary value so the intermediate
+// state never collides with the (workflow_id, step_order) unique
+// constraint. All three updates ride in a single request, so Hasura runs
+// them in one Postgres transaction -- either the whole swap lands or none
+// of it does.
+export const SWAP_STEP_ORDER_MUTATION = `
+  mutation SwapStepOrder($stepAId: uuid!, $stepBId: uuid!, $orderA: Int!, $orderB: Int!, $temp: Int!) {
+    toTemp: update_workflow_steps_by_pk(pk_columns: { id: $stepAId }, _set: { step_order: $temp }) { id }
+    moveB: update_workflow_steps_by_pk(pk_columns: { id: $stepBId }, _set: { step_order: $orderA }) { id }
+    moveA: update_workflow_steps_by_pk(pk_columns: { id: $stepAId }, _set: { step_order: $orderB }) { id }
+  }
+`;
+
 export const ADD_TRIGGER_MUTATION = `
   mutation AddTrigger($object: workflow_triggers_insert_input!) {
     insert_workflow_triggers_one(object: $object) {

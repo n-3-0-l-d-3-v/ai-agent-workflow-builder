@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { gqlRequest, GraphQLRequestError } from '@/lib/graphql';
-import { ADD_STEP_MUTATION, DELETE_STEP_MUTATION } from '@/lib/queries';
+import { ADD_STEP_MUTATION, DELETE_STEP_MUTATION, SWAP_STEP_ORDER_MUTATION } from '@/lib/queries';
 import { STEP_TYPES, StepTypeName, OWNER_ONLY_STEP_TYPES, DEFAULT_STEP_CONFIG } from '@/lib/stepDefaults';
 
 interface Step {
@@ -76,10 +76,29 @@ export function StepEditor({
     onChanged();
   };
 
+  const moveStep = async (index: number, direction: -1 | 1) => {
+    const other = steps[index + direction];
+    const current = steps[index];
+    if (!other) return;
+    setError(null);
+    try {
+      await gqlRequest(SWAP_STEP_ORDER_MUTATION, {
+        stepAId: current.id,
+        stepBId: other.id,
+        orderA: current.step_order,
+        orderB: other.step_order,
+        temp: -1,
+      });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof GraphQLRequestError ? err.message : 'failed to reorder step');
+    }
+  };
+
   return (
     <div>
       <ol className="flex flex-col gap-2 mb-4">
-        {steps.map((s) => (
+        {steps.map((s, i) => (
           <li key={s.id} className="border border-neutral-800 rounded px-3 py-2 flex items-start justify-between gap-3">
             <div>
               <div className="text-sm font-medium">
@@ -91,9 +110,27 @@ export function StepEditor({
               </pre>
             </div>
             {canEdit && (
-              <button onClick={() => deleteStep(s.id)} className="text-xs text-red-400 hover:text-red-300 shrink-0">
-                remove
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => moveStep(i, -1)}
+                  disabled={i === 0}
+                  title="move up"
+                  className="text-xs text-neutral-400 hover:text-neutral-200 disabled:opacity-30 disabled:hover:text-neutral-400"
+                >
+                  ↑
+                </button>
+                <button
+                  onClick={() => moveStep(i, 1)}
+                  disabled={i === steps.length - 1}
+                  title="move down"
+                  className="text-xs text-neutral-400 hover:text-neutral-200 disabled:opacity-30 disabled:hover:text-neutral-400"
+                >
+                  ↓
+                </button>
+                <button onClick={() => deleteStep(s.id)} className="text-xs text-red-400 hover:text-red-300">
+                  remove
+                </button>
+              </div>
             )}
           </li>
         ))}
