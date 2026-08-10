@@ -25,8 +25,10 @@ const handler: NhostHandler = async (req, res) => {
   try {
     const body = parseJsonBody(req.body);
     const sessionVariables = body.session_variables ?? {};
-    const stepRunId: string | undefined = body.input?.step_run_id;
-    const decision: string | undefined = body.input?.decision;
+    // See triggerWorkflowRun.ts for why this is body.input.input, not
+    // body.input, given the argument is itself named `input`.
+    const stepRunId: string | undefined = body.input?.input?.step_run_id;
+    const decision: string | undefined = body.input?.input?.decision;
 
     if (!stepRunId || !decision || !['approve', 'reject'].includes(decision)) {
       res.status(400).json({ message: 'step_run_id and decision ("approve"|"reject") are required' });
