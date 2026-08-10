@@ -137,20 +137,24 @@ async function main() {
           },
         },
         {
+          // Deliberately right after llm_call (not after http_request) so
+          // "previous" in the condition is unambiguously the LLM's output
+          // -- the assignment asks for a branch that changes behavior
+          // based on the LLM's output specifically.
           workflow_id: workflowId,
           org_id: orgAId,
           step_order: 2,
-          type: 'http_request',
-          name: 'Enrich lead via public API',
-          config: { url: 'https://jsonplaceholder.typicode.com/todos/1', method: 'GET' },
+          type: 'conditional_branch',
+          name: 'Branch on sentiment',
+          config: { path: 'text', operator: 'contains', value: 'negative', on_true_goto: 4, on_false_goto: null },
         },
         {
           workflow_id: workflowId,
           org_id: orgAId,
           step_order: 3,
-          type: 'conditional_branch',
-          name: 'Branch on sentiment',
-          config: { path: 'text', operator: 'contains', value: 'negative', on_true_goto: 4, on_false_goto: 5 },
+          type: 'http_request',
+          name: 'Enrich lead via public API',
+          config: { url: 'https://jsonplaceholder.typicode.com/todos/1', method: 'GET' },
         },
         {
           workflow_id: workflowId,
