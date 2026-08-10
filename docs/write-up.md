@@ -132,3 +132,48 @@ synchronously from the caller's perspective.
   (`web/src/lib/stepDefaults.ts`), but that's a UX nicety — the Hasura
   insert/update permission is what actually stops the request if someone
   edits the payload by hand.
+
+## Two bugs that only showed up against the live project
+
+Both were caught by testing against the real hosted nhost project with the
+two-org seed data rather than trusting the code in isolation — worth
+recording since they're easy to reintroduce.
+
+**`_exists` doesn't correlate against the outer row.** The first version of
+every permission filter looked like:
+
+```yaml
+filter:
+  _exists:
+    _table: { schema: public, name: org_members }
+    _where:
+      _and:
+        - org_id: { _ceq: org_id }
+        - user_id: { _eq: X-Hasura-User-Id }
+```
+
+The intent was "does a row exist in org_members with this table row's
+org_id and the caller's user_id". What it actually does: `_ceq` resolves
+against the table named in the *same* `_exists` block (`org_members`), not
+the outer row being permission-checked — so `org_id: {_ceq: org_id}`
+compared `org_members.org_id` to itself, which is always true. Every
+filter collapsed into "is the caller a member of *any* org", not the
+specific org of the row in question. Verified live: an Org B owner could
+read Org A's workflows and list every `org_members` row across both orgs.
+Fixed by switching to Hasura's actual correlated mechanism — relationship-
+based filters (`organization: { members: { user_id: {_eq: ...} } }`),
+which are real joins. Every table needed an `organization` relationship
+added for this (some only had `org_id` as a bare column before).
+
+**Hasura's action payload nests each argument under its own name.** A
+synchronous action's webhook body is `{ action, input, session_variables,
+request_query }`, where `input` holds one key per GraphQL argument. Because
+`triggerWorkflowRun(input: TriggerWorkflowRunInput!)` names its argument
+`input`, the real payload shape is `{ input: { input: { workflow_id }
+} }` — not `{ input: { workflow_id } }`, which is what every Hasura
+Actions example (and my first pass) assumes when the argument isn't
+renamed. Direct curl calls I constructed by hand to test the function
+"worked" because I was constructing the payload to match my own (wrong)
+assumption; only real calls routed through Hasura exposed it. Caught by
+comparing a captured request body (via `console.error` + the nhost
+dashboard's Functions logs) against what the handler expected.
