@@ -142,7 +142,7 @@ async function main() {
           step_order: 2,
           type: 'http_request',
           name: 'Enrich lead via public API',
-          config: { url: 'https://httpbin.org/get', method: 'GET' },
+          config: { url: 'https://jsonplaceholder.typicode.com/todos/1', method: 'GET' },
         },
         {
           workflow_id: workflowId,
