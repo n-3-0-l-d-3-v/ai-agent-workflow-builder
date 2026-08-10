@@ -3,8 +3,13 @@
 // is small and fixed, and it keeps the deploy footprint to zero third-party
 // dependencies.
 
-const ENDPOINT = process.env.HASURA_GRAPHQL_URL;
-const ADMIN_SECRET = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
+// NHOST_GRAPHQL_URL and NHOST_ADMIN_SECRET are injected automatically by
+// nhost into every function's environment -- no manual configuration
+// needed on the project. (Locally, e.g. for scripts/seed.mjs, the
+// equivalent values live under HASURA_GRAPHQL_URL / HASURA_GRAPHQL_ADMIN_SECRET
+// in .env.local, since those aren't running inside nhost's own runtime.)
+const ENDPOINT = process.env.NHOST_GRAPHQL_URL;
+const ADMIN_SECRET = process.env.NHOST_ADMIN_SECRET;
 
 export class HasuraError extends Error {
   constructor(message: string, public errors: unknown) {
@@ -14,7 +19,7 @@ export class HasuraError extends Error {
 
 export async function gql<T = any>(query: string, variables?: Record<string, unknown>): Promise<T> {
   if (!ENDPOINT || !ADMIN_SECRET) {
-    throw new Error('HASURA_GRAPHQL_URL / HASURA_GRAPHQL_ADMIN_SECRET not configured');
+    throw new Error('NHOST_GRAPHQL_URL / NHOST_ADMIN_SECRET not configured');
   }
 
   const res = await fetch(ENDPOINT, {
