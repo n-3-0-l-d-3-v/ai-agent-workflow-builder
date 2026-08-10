@@ -27,6 +27,20 @@ const handler: NhostHandler = async (req, res) => {
     const sessionVariables = body.session_variables ?? {};
     const workflowId: string | undefined = body.input?.workflow_id;
     if (!workflowId) {
+      // TEMP DEBUG round 2 — logged (not in the response, Hasura strips
+      // extra fields from action error JSON down to just `message`), check
+      // via the nhost dashboard's Logs page.
+      console.error('triggerWorkflowRun: no workflow_id', {
+        contentType: req.headers['content-type'],
+        method: req.method,
+        rawBodyType: typeof req.body,
+        isBuffer: Buffer.isBuffer(req.body),
+        rawBodyPreview: Buffer.isBuffer(req.body)
+          ? req.body.toString('utf8').slice(0, 500)
+          : typeof req.body === 'string'
+            ? req.body.slice(0, 500)
+            : JSON.stringify(req.body).slice(0, 500),
+      });
       res.status(400).json({ message: 'workflow_id is required' });
       return;
     }
