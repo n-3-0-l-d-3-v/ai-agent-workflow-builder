@@ -9,14 +9,9 @@ insert_permissions:
   - role: user
     permission:
       check:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
+        organization:
+          members:
             _and:
-              - org_id:
-                  _ceq: org_id
               - user_id:
                   _eq: X-Hasura-User-Id
               - role:
@@ -41,16 +36,10 @@ select_permissions:
         - payload
         - created_at
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
-            _and:
-              - org_id:
-                  _ceq: org_id
-              - user_id:
-                  _eq: X-Hasura-User-Id
+        organization:
+          members:
+            user_id:
+              _eq: X-Hasura-User-Id
 update_permissions:
   - role: user
     permission:
@@ -60,14 +49,9 @@ update_permissions:
         - source
         - payload
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
+        organization:
+          members:
             _and:
-              - org_id:
-                  _ceq: org_id
               - user_id:
                   _eq: X-Hasura-User-Id
               - role:
@@ -79,14 +63,9 @@ delete_permissions:
   - role: user
     permission:
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
+        organization:
+          members:
             _and:
-              - org_id:
-                  _ceq: org_id
               - user_id:
                   _eq: X-Hasura-User-Id
               - role:

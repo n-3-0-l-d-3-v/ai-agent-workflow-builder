@@ -5,6 +5,9 @@ object_relationships:
   - name: workflow
     using:
       foreign_key_constraint_on: workflow_id
+  - name: organization
+    using:
+      foreign_key_constraint_on: org_id
 array_relationships:
   - name: step_runs
     using:
@@ -16,16 +19,14 @@ array_relationships:
 insert_permissions:
   - role: user
     permission:
+      # layer 2: editor/owner can add most step types, but db_write and
+      # notify reach outside the sandbox (writes to arbitrary tables /
+      # sends external notifications) so only an owner may add them.
       check:
         _and:
-          - _exists:
-              _table:
-                name: org_members
-                schema: public
-              _where:
+          - organization:
+              members:
                 _and:
-                  - org_id:
-                      _ceq: org_id
                   - user_id:
                       _eq: X-Hasura-User-Id
                   - role:
@@ -37,14 +38,9 @@ insert_permissions:
                   _nin:
                     - db_write
                     - notify
-              - _exists:
-                  _table:
-                    name: org_members
-                    schema: public
-                  _where:
+              - organization:
+                  members:
                     _and:
-                      - org_id:
-                          _ceq: org_id
                       - user_id:
                           _eq: X-Hasura-User-Id
                       - role:
@@ -70,16 +66,10 @@ select_permissions:
         - created_at
         - updated_at
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
-            _and:
-              - org_id:
-                  _ceq: org_id
-              - user_id:
-                  _eq: X-Hasura-User-Id
+        organization:
+          members:
+            user_id:
+              _eq: X-Hasura-User-Id
 update_permissions:
   - role: user
     permission:
@@ -90,14 +80,9 @@ update_permissions:
         - config
       filter:
         _and:
-          - _exists:
-              _table:
-                name: org_members
-                schema: public
-              _where:
+          - organization:
+              members:
                 _and:
-                  - org_id:
-                      _ceq: org_id
                   - user_id:
                       _eq: X-Hasura-User-Id
                   - role:
@@ -109,14 +94,9 @@ update_permissions:
                   _nin:
                     - db_write
                     - notify
-              - _exists:
-                  _table:
-                    name: org_members
-                    schema: public
-                  _where:
+              - organization:
+                  members:
                     _and:
-                      - org_id:
-                          _ceq: org_id
                       - user_id:
                           _eq: X-Hasura-User-Id
                       - role:
@@ -126,14 +106,9 @@ delete_permissions:
   - role: user
     permission:
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
+        organization:
+          members:
             _and:
-              - org_id:
-                  _ceq: org_id
               - user_id:
                   _eq: X-Hasura-User-Id
               - role:

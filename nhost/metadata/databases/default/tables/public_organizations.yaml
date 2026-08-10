@@ -51,32 +51,19 @@ select_permissions:
         - created_at
         - updated_at
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
-            _and:
-              - org_id:
-                  _ceq: id
-              - user_id:
-                  _eq: X-Hasura-User-Id
+        members:
+          user_id:
+            _eq: X-Hasura-User-Id
 update_permissions:
   - role: user
     permission:
       columns:
         - name
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
-            _and:
-              - org_id:
-                  _ceq: id
-              - user_id:
-                  _eq: X-Hasura-User-Id
-              - role:
-                  _eq: owner
+        members:
+          _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - role:
+                _eq: owner
       check: null

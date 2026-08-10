@@ -1,6 +1,16 @@
 table:
   name: org_usage_current_period
   schema: public
+object_relationships:
+  - name: organization
+    using:
+      manual_configuration:
+        column_mapping:
+          org_id: id
+        insertion_order: null
+        remote_table:
+          name: organizations
+          schema: public
 select_permissions:
   - role: user
     permission:
@@ -14,13 +24,7 @@ select_permissions:
         - failed_runs_this_period
         - avg_run_duration_seconds
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
-            _and:
-              - org_id:
-                  _ceq: org_id
-              - user_id:
-                  _eq: X-Hasura-User-Id
+        organization:
+          members:
+            user_id:
+              _eq: X-Hasura-User-Id

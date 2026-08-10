@@ -2,6 +2,15 @@ table:
   name: step_runs
   schema: public
 object_relationships:
+  - name: workflow_run
+    using:
+      foreign_key_constraint_on: workflow_run_id
+  - name: workflow_step
+    using:
+      foreign_key_constraint_on: workflow_step_id
+  - name: organization
+    using:
+      foreign_key_constraint_on: org_id
   - name: approver
     using:
       manual_configuration:
@@ -11,12 +20,6 @@ object_relationships:
         remote_table:
           name: users
           schema: auth
-  - name: workflow_run
-    using:
-      foreign_key_constraint_on: workflow_run_id
-  - name: workflow_step
-    using:
-      foreign_key_constraint_on: workflow_step_id
 select_permissions:
   - role: user
     permission:
@@ -36,13 +39,9 @@ select_permissions:
         - finished_at
         - created_at
       filter:
-        _exists:
-          _table:
-            name: org_members
-            schema: public
-          _where:
-            _and:
-              - org_id:
-                  _ceq: org_id
-              - user_id:
-                  _eq: X-Hasura-User-Id
+        organization:
+          members:
+            user_id:
+              _eq: X-Hasura-User-Id
+# Deliberately no insert/update/delete for role "user". Approving an
+# approval_gate step is exposed only through the approveStep Action.
