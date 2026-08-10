@@ -27,7 +27,20 @@ const handler: NhostHandler = async (req, res) => {
     const sessionVariables = body.session_variables ?? {};
     const workflowId: string | undefined = body.input?.workflow_id;
     if (!workflowId) {
-      res.status(400).json({ message: 'workflow_id is required' });
+      // TEMP DEBUG — remove after diagnosing body parsing on nhost functions.
+      res.status(400).json({
+        message: 'workflow_id is required',
+        debug: {
+          rawBodyType: typeof req.body,
+          isBuffer: Buffer.isBuffer(req.body),
+          rawBodyPreview: Buffer.isBuffer(req.body)
+            ? req.body.toString('utf8').slice(0, 300)
+            : typeof req.body === 'string'
+              ? req.body.slice(0, 300)
+              : JSON.stringify(req.body).slice(0, 300),
+          parsedKeys: Object.keys(body ?? {}),
+        },
+      });
       return;
     }
 
