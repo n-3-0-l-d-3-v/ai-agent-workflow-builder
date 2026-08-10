@@ -1,21 +1,14 @@
-# Hasura cron triggers are static (fixed schedule, defined in metadata) —
-# they can't express "each workflow has its own cron expression stored in a
-# row". So instead of one Hasura cron trigger per workflow (which would mean
-# editing metadata every time a user changes a schedule), there is a single
-# dispatcher that runs every minute, reads all enabled
-# workflow_triggers where type = 'scheduled', evaluates each one's stored
-# cron expression against the current time, and starts a run for the ones
-# that match. See functions/cron/dispatchScheduled.ts and docs/write-up.md.
 - name: dispatch_scheduled_workflows
-  webhook: "{{ACTIONS_BASE_URL}}/cron/dispatchScheduled"
-  schedule: "* * * * *"
+  webhook: '{{NHOST_FUNCTIONS_URL}}/cron/dispatchScheduled'
+  schedule: '* * * * *'
   include_in_metadata: true
   payload: {}
   retry_conf:
     num_retries: 1
+    retry_interval_seconds: 10
     timeout_seconds: 30
     tolerance_seconds: 21600
   headers:
     - name: x-hasura-admin-secret
-      value_from_env: HASURA_GRAPHQL_ADMIN_SECRET
-  comment: "Polls workflow_triggers (type=scheduled) every minute and starts matching runs"
+      value_from_env: NHOST_ADMIN_SECRET
+  comment: Polls workflow_triggers (type=scheduled) every minute and starts matching runs

@@ -1,6 +1,6 @@
 table:
-  schema: public
   name: workflow_runs
+  schema: public
 object_relationships:
   - name: workflow
     using:
@@ -11,8 +11,8 @@ array_relationships:
       foreign_key_constraint_on:
         column: workflow_run_id
         table:
-          schema: public
           name: step_runs
+          schema: public
 select_permissions:
   - role: user
     permission:
@@ -30,14 +30,12 @@ select_permissions:
         - created_at
       filter:
         _exists:
-          _table: { schema: public, name: org_members }
+          _table:
+            name: org_members
+            schema: public
           _where:
             _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
-# No insert/update/delete permissions for role "user" — a run may only be
-# created and progressed by the triggerWorkflowRun / approveStep Action
-# handlers (which use the admin secret). This is where quota checks, retry
-# logic and the approval-gate role check actually live; a database
-# permission alone can't express "pause mid-execution until an
-# owner/editor approves", so we deliberately don't try to.
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id

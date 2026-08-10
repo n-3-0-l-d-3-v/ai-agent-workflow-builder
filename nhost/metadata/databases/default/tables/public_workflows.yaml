@@ -1,38 +1,63 @@
 table:
-  schema: public
   name: workflows
+  schema: public
 object_relationships:
   - name: organization
     using:
       foreign_key_constraint_on: org_id
 array_relationships:
-  - name: steps
-    using:
-      foreign_key_constraint_on:
-        column: workflow_id
-        table:
-          schema: public
-          name: workflow_steps
-  - name: triggers
-    using:
-      foreign_key_constraint_on:
-        column: workflow_id
-        table:
-          schema: public
-          name: workflow_triggers
   - name: runs
     using:
       foreign_key_constraint_on:
         column: workflow_id
         table:
-          schema: public
           name: workflow_runs
+          schema: public
+  - name: steps
+    using:
+      foreign_key_constraint_on:
+        column: workflow_id
+        table:
+          name: workflow_steps
+          schema: public
+  - name: triggers
+    using:
+      foreign_key_constraint_on:
+        column: workflow_id
+        table:
+          name: workflow_triggers
+          schema: public
 computed_fields:
   - name: avg_duration_seconds
     definition:
       function:
-        schema: public
         name: workflow_avg_duration_seconds
+        schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check:
+        _exists:
+          _table:
+            name: org_members
+            schema: public
+          _where:
+            _and:
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - role:
+                  _in:
+                    - owner
+                    - editor
+      set:
+        created_by: x-hasura-User-Id
+      columns:
+        - org_id
+        - name
+        - description
+        - is_active
 select_permissions:
   - role: user
     permission:
@@ -49,29 +74,15 @@ select_permissions:
         - avg_duration_seconds
       filter:
         _exists:
-          _table: { schema: public, name: org_members }
+          _table:
+            name: org_members
+            schema: public
           _where:
             _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
-insert_permissions:
-  - role: user
-    permission:
-      check:
-        _exists:
-          _table: { schema: public, name: org_members }
-          _where:
-            _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
-              - role: { _in: [owner, editor] }
-      columns:
-        - org_id
-        - name
-        - description
-        - is_active
-      set:
-        created_by: x-hasura-User-Id
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id
 update_permissions:
   - role: user
     permission:
@@ -81,21 +92,33 @@ update_permissions:
         - is_active
       filter:
         _exists:
-          _table: { schema: public, name: org_members }
+          _table:
+            name: org_members
+            schema: public
           _where:
             _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
-              - role: { _in: [owner, editor] }
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - role:
+                  _in:
+                    - owner
+                    - editor
       check: null
 delete_permissions:
   - role: user
     permission:
       filter:
         _exists:
-          _table: { schema: public, name: org_members }
+          _table:
+            name: org_members
+            schema: public
           _where:
             _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
-              - role: { _eq: owner }
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - role:
+                  _eq: owner

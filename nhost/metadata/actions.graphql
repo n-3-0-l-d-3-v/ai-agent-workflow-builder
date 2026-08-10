@@ -1,10 +1,17 @@
-input TriggerWorkflowRunInput {
-  workflow_id: uuid!
+type Mutation {
+  approveStep(
+    input: ApproveStepInput!
+  ): ApproveStepOutput
 }
 
-type TriggerWorkflowRunOutput {
-  workflow_run_id: uuid!
-  status: String!
+type Mutation {
+  triggerWorkflowRun(
+    input: TriggerWorkflowRunInput!
+  ): TriggerWorkflowRunOutput
+}
+
+input TriggerWorkflowRunInput {
+  workflow_id: uuid!
 }
 
 input ApproveStepInput {
@@ -12,8 +19,14 @@ input ApproveStepInput {
   decision: String!
 }
 
+type TriggerWorkflowRunOutput {
+  workflow_run_id: uuid!
+  status: String!
+}
+
 type ApproveStepOutput {
   step_run_id: uuid!
   workflow_run_id: uuid!
   status: String!
 }
+

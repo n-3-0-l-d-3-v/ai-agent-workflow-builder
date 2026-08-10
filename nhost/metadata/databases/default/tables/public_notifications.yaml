@@ -1,6 +1,6 @@
 table:
-  schema: public
   name: notifications
+  schema: public
 object_relationships:
   - name: step_run
     using:
@@ -25,24 +25,26 @@ select_permissions:
         - created_at
       filter:
         _exists:
-          _table: { schema: public, name: org_members }
+          _table:
+            name: org_members
+            schema: public
           _where:
             _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
-# Written only by the run engine (insert) and the notify event-trigger
-# handler (update to sent/failed), both via admin secret.
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id
 event_triggers:
   - name: notify_on_notification_created
     definition:
       enable_manual: false
       insert:
-        columns: "*"
+        columns: '*'
     retry_conf:
-      num_retries: 3
       interval_sec: 10
+      num_retries: 3
       timeout_sec: 30
-    webhook: "{{ACTIONS_BASE_URL}}/events/sendNotification"
+    webhook: '{{NHOST_FUNCTIONS_URL}}/events/sendNotification'
     headers:
       - name: x-hasura-admin-secret
-        value_from_env: HASURA_GRAPHQL_ADMIN_SECRET
+        value_from_env: NHOST_ADMIN_SECRET

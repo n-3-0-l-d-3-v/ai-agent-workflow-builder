@@ -1,6 +1,6 @@
 table:
-  schema: public
   name: workflow_steps
+  schema: public
 object_relationships:
   - name: workflow
     using:
@@ -11,8 +11,51 @@ array_relationships:
       foreign_key_constraint_on:
         column: workflow_step_id
         table:
-          schema: public
           name: step_runs
+          schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check:
+        _and:
+          - _exists:
+              _table:
+                name: org_members
+                schema: public
+              _where:
+                _and:
+                  - org_id:
+                      _ceq: org_id
+                  - user_id:
+                      _eq: X-Hasura-User-Id
+                  - role:
+                      _in:
+                        - owner
+                        - editor
+          - _or:
+              - type:
+                  _nin:
+                    - db_write
+                    - notify
+              - _exists:
+                  _table:
+                    name: org_members
+                    schema: public
+                  _where:
+                    _and:
+                      - org_id:
+                          _ceq: org_id
+                      - user_id:
+                          _eq: X-Hasura-User-Id
+                      - role:
+                          _eq: owner
+      columns:
+        - workflow_id
+        - org_id
+        - step_order
+        - type
+        - name
+        - config
 select_permissions:
   - role: user
     permission:
@@ -28,42 +71,15 @@ select_permissions:
         - updated_at
       filter:
         _exists:
-          _table: { schema: public, name: org_members }
+          _table:
+            name: org_members
+            schema: public
           _where:
             _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
-insert_permissions:
-  - role: user
-    permission:
-      # layer 2: editor/owner can add most step types, but db_write and
-      # notify reach outside the sandbox (writes to arbitrary tables /
-      # sends external notifications) so only an owner may add them.
-      check:
-        _and:
-          - _exists:
-              _table: { schema: public, name: org_members }
-              _where:
-                _and:
-                  - org_id: { _ceq: org_id }
-                  - user_id: { _eq: X-Hasura-User-Id }
-                  - role: { _in: [owner, editor] }
-          - _or:
-              - type: { _nin: [db_write, notify] }
-              - _exists:
-                  _table: { schema: public, name: org_members }
-                  _where:
-                    _and:
-                      - org_id: { _ceq: org_id }
-                      - user_id: { _eq: X-Hasura-User-Id }
-                      - role: { _eq: owner }
-      columns:
-        - workflow_id
-        - org_id
-        - step_order
-        - type
-        - name
-        - config
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id
 update_permissions:
   - role: user
     permission:
@@ -75,30 +91,52 @@ update_permissions:
       filter:
         _and:
           - _exists:
-              _table: { schema: public, name: org_members }
+              _table:
+                name: org_members
+                schema: public
               _where:
                 _and:
-                  - org_id: { _ceq: org_id }
-                  - user_id: { _eq: X-Hasura-User-Id }
-                  - role: { _in: [owner, editor] }
+                  - org_id:
+                      _ceq: org_id
+                  - user_id:
+                      _eq: X-Hasura-User-Id
+                  - role:
+                      _in:
+                        - owner
+                        - editor
           - _or:
-              - type: { _nin: [db_write, notify] }
+              - type:
+                  _nin:
+                    - db_write
+                    - notify
               - _exists:
-                  _table: { schema: public, name: org_members }
+                  _table:
+                    name: org_members
+                    schema: public
                   _where:
                     _and:
-                      - org_id: { _ceq: org_id }
-                      - user_id: { _eq: X-Hasura-User-Id }
-                      - role: { _eq: owner }
+                      - org_id:
+                          _ceq: org_id
+                      - user_id:
+                          _eq: X-Hasura-User-Id
+                      - role:
+                          _eq: owner
       check: null
 delete_permissions:
   - role: user
     permission:
       filter:
         _exists:
-          _table: { schema: public, name: org_members }
+          _table:
+            name: org_members
+            schema: public
           _where:
             _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
-              - role: { _in: [owner, editor] }
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - role:
+                  _in:
+                    - owner
+                    - editor

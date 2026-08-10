@@ -1,0 +1,12 @@
+table:
+  name: users
+  schema: auth
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - display_name
+        - email
+        - avatar_url
+      filter: {}

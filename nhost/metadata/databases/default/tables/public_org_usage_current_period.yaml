@@ -1,9 +1,6 @@
 table:
-  schema: public
   name: org_usage_current_period
-configuration:
-  custom_root_fields: {}
-  custom_column_names: {}
+  schema: public
 select_permissions:
   - role: user
     permission:
@@ -18,8 +15,12 @@ select_permissions:
         - avg_run_duration_seconds
       filter:
         _exists:
-          _table: { schema: public, name: org_members }
+          _table:
+            name: org_members
+            schema: public
           _where:
             _and:
-              - org_id: { _ceq: org_id }
-              - user_id: { _eq: X-Hasura-User-Id }
+              - org_id:
+                  _ceq: org_id
+              - user_id:
+                  _eq: X-Hasura-User-Id
