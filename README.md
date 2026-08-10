@@ -66,7 +66,11 @@ Docker stack — see **Setup** below.
    `NHOST_SUBDOMAIN` / `NHOST_REGION` (or read them off the project URL:
    `https://<subdomain>.hasura.<region>.nhost.run`).
 4. Under **Settings -> Secrets**, set `HASURA_GRAPHQL_ADMIN_SECRET` to a
-   value you choose (secrets are write-only in the dashboard).
+   value you choose (secrets are write-only in the dashboard). Nothing
+   else needs configuring for the functions themselves -- nhost
+   auto-injects `NHOST_GRAPHQL_URL` / `NHOST_ADMIN_SECRET` into every
+   function's environment already (see
+   [functions/lib/hasura.ts](functions/lib/hasura.ts)).
 5. Optionally set `GROQ_API_KEY` as a secret so `llm_call` steps hit a
    real model instead of the disclosed stub (see
    [functions/lib/llm.ts](functions/lib/llm.ts) — without a key, `llm_call`

@@ -69,7 +69,7 @@ export function TriggerEditor({
   const subdomain = process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN;
   const region = process.env.NEXT_PUBLIC_NHOST_REGION;
   const webhookBaseUrl =
-    subdomain && region ? `https://${subdomain}.functions.${region}.nhost.run` : '<nhost functions URL>';
+    subdomain && region ? `https://${subdomain}.functions.${region}.nhost.run/v1` : '<nhost functions URL>';
 
   return (
     <div>
