@@ -1,7 +1,7 @@
 # Dispatch
 
 **Live app**: https://dispatch-subspace.vercel.app
-**Demo recording**: [Final Task scenario walkthrough](PASTE_YOUR_VIDEO_LINK_HERE)
+**Demo recording**: [Final Task scenario walkthrough](docs/demo/final-task-walkthrough.mp4)
 
 An AI agent workflow orchestrator — a mini n8n purpose-built for chaining AI
 agent steps. Organizations build
