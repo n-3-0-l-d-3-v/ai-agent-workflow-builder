@@ -1,14 +1,26 @@
 @import "tailwindcss";
 
+/*
+ * Palette rationale: warm charcoal + ivory, one accent (a muted copper/
+ * amber — think signal lamps on old dispatch equipment, not "AI product
+ * purple"). No gradients, no glow, no blur-everywhere. Color is used to
+ * mean something specific: the accent only ever marks the thing that
+ * currently needs a human's attention (a running step, a paused approval
+ * gate, the primary action) — everything else stays in the neutral scale.
+ */
 :root {
-  --background: #08090c;
-  --foreground: #f4f4f6;
-  --surface: #101218;
-  --surface-2: #16181f;
-  --border: #23262f;
-  --accent-1: #8b5cf6;
-  --accent-2: #06b6d4;
-  --accent-glow: rgba(139, 92, 246, 0.35);
+  --background: #100f0d;
+  --surface: #171613;
+  --surface-2: #1e1c18;
+  --border: #2b2924;
+  --border-strong: #3a3730;
+  --foreground: #e9e5da;
+  --muted: #8a8578;
+  --muted-2: #625e53;
+  --accent: #c8874a;
+  --accent-ink: #100f0d;
+  --success: #7d9b6f;
+  --danger: #b5594a;
 }
 
 @theme inline {
@@ -19,24 +31,19 @@
 }
 
 * {
-  scrollbar-color: #33363f var(--surface);
+  scrollbar-color: var(--border-strong) var(--background);
   scrollbar-width: thin;
 }
-
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2d37;
+  background: var(--border-strong);
   border-radius: 999px;
-  border: 2px solid var(--background);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3a3e4a;
 }
 
 html {
@@ -44,97 +51,86 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(139, 92, 246, 0.12), transparent 60%),
-    radial-gradient(1000px 500px at 100% 0%, rgba(6, 182, 212, 0.08), transparent 55%),
-    var(--background);
+  background: var(--background);
   color: var(--foreground);
-  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
 }
 
-.text-gradient {
-  background-image: linear-gradient(120deg, var(--accent-2), var(--accent-1) 60%, #f472b6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.glass {
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
+.mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: -0.01em;
 }
 
 .card {
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.9rem;
+  border-radius: 0.5rem;
 }
 
 .card-hover {
-  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  transition: border-color 140ms ease, background-color 140ms ease;
 }
 .card-hover:hover {
-  border-color: color-mix(in srgb, var(--accent-1) 45%, var(--border));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-1) 18%, transparent), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
 }
 
 .btn-primary {
-  background-image: linear-gradient(120deg, var(--accent-2), var(--accent-1));
-  color: #050507;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-weight: 600;
-  transition: filter 150ms ease, transform 150ms ease;
+  transition: background-color 140ms ease, transform 100ms ease;
 }
 .btn-primary:hover {
-  filter: brightness(1.08);
+  background: #d69a5f;
 }
 .btn-primary:active {
   transform: scale(0.98);
 }
 
-.dot-grid {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 22px 22px;
+.rule {
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    var(--border) 15%,
+    var(--border) 85%,
+    transparent
+  );
+  height: 1px;
 }
 
-@keyframes pulse-ring {
-  0% {
-    box-shadow: 0 0 0 0 var(--accent-glow);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(139, 92, 246, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
-  }
-}
-.pulse-ring {
-  animation: pulse-ring 1.8s ease-out infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-.shimmer {
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.6s ease-in-out infinite;
-}
-
-@keyframes float-slow {
+@keyframes soft-pulse {
   0%, 100% {
-    transform: translateY(0px);
+    opacity: 1;
   }
   50% {
-    transform: translateY(-8px);
+    opacity: 0.45;
   }
 }
-.float-slow {
-  animation: float-slow 6s ease-in-out infinite;
+.soft-pulse {
+  animation: soft-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes fade-shift {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+.skeleton {
+  background: var(--surface-2);
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  animation: fade-shift 1.8s ease-in-out infinite;
 }

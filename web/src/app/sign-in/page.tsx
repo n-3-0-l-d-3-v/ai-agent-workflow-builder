@@ -40,7 +40,7 @@ export default function SignInPage() {
       footer={
         <>
           Don&apos;t have an account?{' '}
-          <Link href="/sign-up" className="text-violet-300 hover:text-violet-200">
+          <Link href="/sign-up" className="text-[var(--accent)] hover:opacity-80">
             Sign up
           </Link>
         </>
@@ -66,15 +66,15 @@ export default function SignInPage() {
         />
 
         {error && (
-          <div className="flex items-start gap-2 rounded-lg border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs text-red-300">
+          <div className="flex items-start gap-2 rounded border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
             <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             {error}
           </div>
         )}
 
-        <button type="submit" disabled={loading} className="btn-primary group mt-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm disabled:opacity-50">
+        <button type="submit" disabled={loading} className="btn-primary mt-1 flex items-center justify-center gap-2 rounded py-2.5 text-sm disabled:opacity-50">
           {loading ? 'Signing in…' : 'Sign in'}
-          {!loading && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
+          {!loading && <ArrowRight className="h-4 w-4" />}
         </button>
       </form>
     </AuthCard>

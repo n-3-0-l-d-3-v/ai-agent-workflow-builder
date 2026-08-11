@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { use as usePromise } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Play, ListChecks, Radio, AlertCircle, GitFork, Zap } from 'lucide-react';
+import { ArrowLeft, Play, ListChecks, Radio, AlertCircle, GitFork } from 'lucide-react';
 import { useOrg } from '@/context/OrgProvider';
 import { gqlRequest, GraphQLRequestError } from '@/lib/graphql';
 import { WORKFLOWS_QUERY, TRIGGER_WORKFLOW_RUN_MUTATION, RUN_HISTORY_QUERY } from '@/lib/queries';
@@ -76,8 +76,8 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
   if (!currentOrg || !workflow) {
     return (
       <div className="flex flex-col gap-3">
-        <div className="shimmer h-6 w-64 rounded" />
-        <div className="shimmer h-40 w-full rounded-xl" />
+        <div className="skeleton h-6 w-64 rounded" />
+        <div className="skeleton h-40 w-full rounded" />
       </div>
     );
   }
@@ -90,33 +90,28 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
     <div>
       <Link
         href="/workflows"
-        className="mb-3 inline-flex items-center gap-1 text-xs text-neutral-500 transition-colors hover:text-neutral-300"
+        className="mb-3 inline-flex items-center gap-1 text-xs text-[var(--muted)] transition-colors hover:text-neutral-300"
       >
         <ArrowLeft className="h-3 w-3" /> workflows
       </Link>
 
       <div className="mb-7 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">{workflow.name}</h1>
-          {workflow.description && <p className="mt-1 text-sm text-neutral-500">{workflow.description}</p>}
+          <h1 className="text-xl font-medium tracking-tight text-[var(--foreground)]">{workflow.name}</h1>
+          {workflow.description && <p className="mt-1 text-sm text-[var(--muted)]">{workflow.description}</p>}
         </div>
         {canTrigger && (
-          <motion.button
-            whileTap={{ scale: 0.96 }}
+          <button
             onClick={runNow}
             disabled={triggering}
-            className={`btn-primary flex shrink-0 items-center gap-2 rounded-xl px-5 py-2.5 text-sm disabled:opacity-60 ${triggering ? 'pulse-ring' : ''}`}
+            className="btn-primary flex shrink-0 items-center gap-2 rounded px-5 py-2.5 text-sm disabled:opacity-60"
           >
-            {triggering ? (
-              <>
-                <Zap className="h-4 w-4 animate-pulse" /> Starting…
-              </>
-            ) : (
+            {triggering ? 'Starting…' : (
               <>
                 <Play className="h-4 w-4 fill-current" /> Run
               </>
             )}
-          </motion.button>
+          </button>
         )}
       </div>
 
@@ -126,7 +121,7 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-4 flex items-center gap-2 rounded-lg border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs text-red-300"
+            className="mb-4 flex items-center gap-2 rounded border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]"
           >
             <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {error}
           </motion.div>
@@ -135,7 +130,7 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <section>
-          <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <h2 className="mono mb-3 flex items-center gap-1.5 text-xs uppercase tracking-wide text-[var(--muted)]">
             <GitFork className="h-3.5 w-3.5" /> Steps
           </h2>
           <StepEditor
@@ -147,7 +142,7 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
             onChanged={load}
           />
 
-          <h2 className="mb-3 mt-8 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <h2 className="mono mb-3 mt-8 flex items-center gap-1.5 text-xs uppercase tracking-wide text-[var(--muted)]">
             <Radio className="h-3.5 w-3.5" /> Triggers
           </h2>
           <TriggerEditor
@@ -161,7 +156,7 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
         </section>
 
         <section className="lg:sticky lg:top-20 lg:self-start">
-          <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <h2 className="mono mb-3 flex items-center gap-1.5 text-xs uppercase tracking-wide text-[var(--muted)]">
             <ListChecks className="h-3.5 w-3.5" />
             {activeRunId ? 'Live run' : 'Run history'}
           </h2>
@@ -169,7 +164,7 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
             <>
               <button
                 onClick={() => setActiveRunId(null)}
-                className="mb-3 flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300"
+                className="mb-3 flex items-center gap-1 text-xs text-[var(--muted)] hover:text-neutral-300"
               >
                 <ArrowLeft className="h-3 w-3" /> back to history
               </button>
@@ -192,22 +187,22 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
                       className="card card-hover flex items-center justify-between px-3.5 py-2.5 text-left"
                     >
                       <div className="flex items-center gap-2.5">
-                        {TriggerIcon && <TriggerIcon className="h-3.5 w-3.5 text-neutral-500" />}
+                        {TriggerIcon && <TriggerIcon className="h-3.5 w-3.5 text-[var(--muted-2)]" />}
                         <div>
                           <StatusBadge status={run.status} />
                           {run.started_at && (
-                            <div className="mt-1 text-[11px] text-neutral-600">{new Date(run.started_at).toLocaleString()}</div>
+                            <div className="mono mt-1 text-[11px] text-[var(--muted-2)]">{new Date(run.started_at).toLocaleString()}</div>
                           )}
                         </div>
                       </div>
-                      <span className="text-[11px] capitalize text-neutral-500">{run.trigger_type}</span>
+                      <span className="mono text-[11px] capitalize text-[var(--muted-2)]">{run.trigger_type}</span>
                     </motion.button>
                   );
                 })}
               </AnimatePresence>
               {runHistory.length === 0 && (
                 <div className="card flex flex-col items-center gap-2 px-4 py-10 text-center">
-                  <p className="text-sm text-neutral-500">No runs yet.</p>
+                  <p className="text-sm text-[var(--muted)]">No runs yet.</p>
                 </div>
               )}
             </div>

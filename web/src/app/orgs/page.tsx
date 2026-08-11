@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, Plus, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
+import { Plus, ArrowRight, AlertCircle } from 'lucide-react';
 import { useOrg } from '@/context/OrgProvider';
 import { gqlRequest } from '@/lib/graphql';
 import { CREATE_ORG_MUTATION } from '@/lib/queries';
@@ -43,14 +43,9 @@ export default function OrgsPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-6 flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400/20 to-violet-500/20">
-          <Building2 className="h-4.5 w-4.5 text-violet-300" />
-        </span>
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">Organizations</h1>
-          <p className="text-xs text-neutral-500">Every workflow lives inside exactly one of these.</p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-lg font-medium tracking-tight text-[var(--foreground)]">Organizations</h1>
+        <p className="mt-0.5 text-xs text-[var(--muted)]">Every workflow lives inside exactly one of these.</p>
       </div>
 
       <div className="mb-6 flex flex-col gap-2">
@@ -60,25 +55,19 @@ export default function OrgsPage() {
             return (
               <motion.button
                 key={org.id}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.03 }}
+                transition={{ duration: 0.25, delay: i * 0.03 }}
                 onClick={() => setCurrentOrgId(org.id)}
-                className={`card card-hover flex items-center justify-between px-4 py-3 text-left transition-colors ${
-                  active ? 'border-violet-500/40 bg-violet-500/[0.06]' : ''
-                }`}
+                className={`card card-hover flex items-center justify-between px-4 py-3 text-left ${active ? 'border-[var(--border-strong)]' : ''}`}
               >
                 <div className="flex items-center gap-3">
-                  <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-semibold ${
-                      active ? 'bg-gradient-to-br from-cyan-400 to-violet-500 text-black' : 'bg-white/5 text-neutral-400'
-                    }`}
-                  >
+                  <span className="mono flex h-7 w-7 items-center justify-center rounded border border-[var(--border)] text-xs text-[var(--muted)]">
                     {org.name.slice(0, 1).toUpperCase()}
                   </span>
                   <span className="text-sm text-neutral-200">{org.name}</span>
-                  {active && <span className="text-[10px] uppercase tracking-wide text-violet-300">current</span>}
+                  {active && <span className="mono text-[10px] uppercase tracking-wide text-[var(--accent)]">current</span>}
                 </div>
                 <RoleBadge role={org.role} />
               </motion.button>
@@ -87,8 +76,7 @@ export default function OrgsPage() {
         </AnimatePresence>
         {orgs.length === 0 && (
           <div className="card flex flex-col items-center gap-2 px-4 py-10 text-center">
-            <Sparkles className="h-5 w-5 text-neutral-600" />
-            <p className="text-sm text-neutral-500">You&apos;re not a member of any organization yet.</p>
+            <p className="text-sm text-[var(--muted)]">You&apos;re not a member of any organization yet.</p>
           </div>
         )}
       </div>
@@ -99,12 +87,12 @@ export default function OrgsPage() {
           placeholder="New organization name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="flex-1 bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-neutral-600"
+          className="flex-1 bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-[var(--muted-2)]"
         />
         <button
           type="submit"
           disabled={creating}
-          className="btn-primary flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm disabled:opacity-50"
+          className="btn-primary flex shrink-0 items-center gap-1.5 rounded px-3.5 py-2 text-sm disabled:opacity-50"
         >
           {creating ? (
             'Creating…'
@@ -116,12 +104,12 @@ export default function OrgsPage() {
         </button>
       </form>
       {error && (
-        <div className="mt-2 flex items-start gap-2 rounded-lg border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs text-red-300">
+        <div className="mt-2 flex items-start gap-2 rounded border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {error}
         </div>
       )}
-      <p className="mt-3 flex items-center gap-1.5 text-xs text-neutral-600">
+      <p className="mt-3 flex items-center gap-1.5 text-xs text-[var(--muted-2)]">
         <ArrowRight className="h-3 w-3" />
         Creating an organization makes you its owner automatically.
       </p>

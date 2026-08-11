@@ -45,7 +45,7 @@ export default function SignUpPage() {
       footer={
         <>
           Already have an account?{' '}
-          <Link href="/sign-in" className="text-violet-300 hover:text-violet-200">
+          <Link href="/sign-in" className="text-[var(--accent)] hover:opacity-80">
             Sign in
           </Link>
         </>
@@ -72,15 +72,15 @@ export default function SignUpPage() {
         />
 
         {error && (
-          <div className="flex items-start gap-2 rounded-lg border border-amber-900/50 bg-amber-950/25 px-3 py-2 text-xs text-amber-300">
+          <div className="flex items-start gap-2 rounded border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-2 text-xs text-[var(--accent)]">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             {error}
           </div>
         )}
 
-        <button type="submit" disabled={loading} className="btn-primary group mt-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm disabled:opacity-50">
+        <button type="submit" disabled={loading} className="btn-primary mt-1 flex items-center justify-center gap-2 rounded py-2.5 text-sm disabled:opacity-50">
           {loading ? 'Creating account…' : 'Create account'}
-          {!loading && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
+          {!loading && <ArrowRight className="h-4 w-4" />}
         </button>
       </form>
     </AuthCard>
