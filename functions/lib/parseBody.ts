@@ -6,7 +6,11 @@
  */
 export function parseJsonBody(body: unknown): any {
   if (body == null) return {};
-  if (typeof body === 'object') return body;
+  // Buffer must be checked before the generic `typeof === 'object'` branch
+  // below -- a Buffer's typeof is also 'object' in JS, so this order
+  // matters: getting it backwards means every Buffer body silently returns
+  // itself unparsed instead of being JSON.parse'd, and `body.input` on a
+  // Buffer is just undefined. (This exact bug shipped once already.)
   if (Buffer.isBuffer(body)) {
     try {
       return JSON.parse(body.toString('utf8') || '{}');
@@ -21,5 +25,6 @@ export function parseJsonBody(body: unknown): any {
       return {};
     }
   }
+  if (typeof body === 'object') return body;
   return {};
 }
