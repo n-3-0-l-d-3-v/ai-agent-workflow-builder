@@ -1,5 +1,7 @@
 # Dispatch
 
+https://github.com/user-attachments/assets/578908af-20e0-44a7-98cc-b080dd1ae5bb
+
 **Live app**: https://dispatch-subspace.vercel.app
 
 **Demo recording**: [Final Task scenario walkthrough](docs/demo/final-task-walkthrough.mp4)
