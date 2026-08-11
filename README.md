@@ -2,12 +2,7 @@
 
 **Live app**: https://dispatch-subspace.vercel.app
 
-**Demo recording — Final Task scenario walkthrough:**
-
-<video src="docs/demo/final-task-walkthrough.mp4" controls width="720">
-  Video won't play inline? Watch it directly:
-  <a href="docs/demo/final-task-walkthrough.mp4">docs/demo/final-task-walkthrough.mp4</a>
-</video>
+**Demo recording**: [Final Task scenario walkthrough](docs/demo/final-task-walkthrough.mp4)
 
 An AI agent workflow orchestrator — a mini n8n purpose-built for chaining AI
 agent steps. Organizations build
