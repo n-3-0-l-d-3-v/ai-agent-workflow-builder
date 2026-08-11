@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthProvider';
+import { TerminalDemo } from '@/components/TerminalDemo';
 
 const FEATURES = [
   {
@@ -43,46 +44,57 @@ export default function Home() {
 
   return (
     <div>
-      <div className="mx-auto mt-8 max-w-2xl sm:mt-14">
-        <p className="mono mb-4 text-xs text-[var(--muted)]">org-scoped · role-gated · live</p>
-        <h1 className="text-3xl font-medium leading-[1.15] tracking-tight text-[var(--foreground)] sm:text-4xl">
-          Build AI agent workflows that actually run themselves.
-        </h1>
-        <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-[var(--muted)]">
-          Chain <code className="mono rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[13px] text-neutral-300">llm_call</code>,{' '}
-          <code className="mono rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[13px] text-neutral-300">http_request</code>,{' '}
-          <code className="mono rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[13px] text-neutral-300">conditional_branch</code>, and{' '}
-          <code className="mono rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[13px] text-neutral-300">approval_gate</code> steps
-          into workflows that trigger on a schedule, a webhook, or a database event — with every action checked against org and role
-          permissions, live.
-        </p>
+      <div className="grid grid-cols-1 items-center gap-10 pt-6 lg:grid-cols-[1.1fr_1fr] lg:gap-14 lg:pt-10">
+        <div>
+          <p className="mono mb-4 text-xs text-[var(--muted)]">org-scoped · role-gated · live</p>
+          <h1 className="font-heading text-3xl font-semibold leading-[1.15] tracking-tight text-[var(--foreground)] sm:text-4xl">
+            Build AI agent workflows that actually run themselves.
+          </h1>
+          <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-[var(--muted)]">
+            Chain <code className="mono rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[13px] text-neutral-300">llm_call</code>,{' '}
+            <code className="mono rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[13px] text-neutral-300">http_request</code>,{' '}
+            <code className="mono rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[13px] text-neutral-300">conditional_branch</code>,
+            and <code className="mono rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[13px] text-neutral-300">approval_gate</code>{' '}
+            steps into workflows that trigger on a schedule, a webhook, or a database event — with every action checked against org
+            and role permissions, live.
+          </p>
 
-        <div className="mt-8 flex items-center gap-3">
-          {userId ? (
-            <Link href="/workflows" className="btn-primary rounded px-5 py-2.5 text-sm">
-              Go to workflows
-            </Link>
-          ) : (
-            <>
-              <Link href="/sign-up" className="btn-primary rounded px-5 py-2.5 text-sm">
-                Get started
+          <div className="mt-8 flex items-center gap-3">
+            {userId ? (
+              <Link href="/workflows" className="btn-primary rounded px-5 py-2.5 text-sm">
+                Go to workflows
               </Link>
-              <Link href="/sign-in" className="rounded border border-[var(--border)] px-5 py-2.5 text-sm text-[var(--muted)] transition-colors hover:border-[var(--border-strong)] hover:text-neutral-200">
-                Sign in
-              </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link href="/sign-up" className="btn-primary rounded px-5 py-2.5 text-sm">
+                  Get started
+                </Link>
+                <Link
+                  href="/sign-in"
+                  className="rounded border border-[var(--border)] px-5 py-2.5 text-sm text-[var(--muted)] transition-colors hover:border-[var(--border-strong)] hover:text-neutral-200"
+                >
+                  Sign in
+                </Link>
+              </>
+            )}
+          </div>
         </div>
+
+        <TerminalDemo />
       </div>
 
-      <div className="rule mx-auto my-14 max-w-5xl" />
+      <div className="rule my-14" />
 
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
+      <div className="mb-4 flex items-center gap-2">
+        <span className="mono text-xs text-[var(--muted-2)]">#</span>
+        <h2 className="font-heading text-sm font-medium text-neutral-300">What it actually does</h2>
+      </div>
+      <div className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
         {FEATURES.map((f) => (
           <div key={f.n} className="flex gap-4">
             <span className="mono mt-0.5 shrink-0 text-xs text-[var(--muted-2)]">{f.n}</span>
             <div>
-              <h3 className="text-sm font-medium text-neutral-200">{f.title}</h3>
+              <h3 className="font-heading text-sm font-medium text-neutral-200">{f.title}</h3>
               <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--muted)]">{f.body}</p>
             </div>
           </div>
