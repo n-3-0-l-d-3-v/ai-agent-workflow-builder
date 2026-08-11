@@ -1,8 +1,12 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 import { nhost } from '@/lib/nhost';
+import { AuthCard } from '@/components/AuthCard';
+import { FieldInput } from '@/components/FieldInput';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -18,46 +22,61 @@ export default function SignInPage() {
     try {
       const res = await nhost.auth.signInEmailPassword({ email, password });
       if (!res.body?.session) {
-        setError('sign-in requires an additional step (e.g. MFA) not supported in this demo UI');
+        setError('Sign-in requires an additional step (e.g. MFA) not supported in this demo UI');
         return;
       }
       router.push('/workflows');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'sign in failed');
+      setError(err instanceof Error ? err.message : 'Sign in failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-sm mx-auto mt-16">
-      <h1 className="text-lg font-semibold mb-6">Sign in</h1>
+    <AuthCard
+      title="Welcome back"
+      subtitle="Sign in to keep building"
+      footer={
+        <>
+          Don&apos;t have an account?{' '}
+          <Link href="/sign-up" className="text-violet-300 hover:text-violet-200">
+            Sign up
+          </Link>
+        </>
+      }
+    >
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <input
+        <FieldInput
+          icon={Mail}
           type="email"
           required
-          placeholder="email"
+          autoFocus
+          placeholder="you@company.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
         />
-        <input
+        <FieldInput
+          icon={Lock}
           type="password"
           required
           placeholder="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
         />
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-neutral-100 text-neutral-900 rounded px-3 py-2 text-sm font-medium disabled:opacity-50"
-        >
-          {loading ? 'signing in...' : 'sign in'}
+
+        {error && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs text-red-300">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            {error}
+          </div>
+        )}
+
+        <button type="submit" disabled={loading} className="btn-primary group mt-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm disabled:opacity-50">
+          {loading ? 'Signing in…' : 'Sign in'}
+          {!loading && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
         </button>
       </form>
-    </div>
+    </AuthCard>
   );
 }

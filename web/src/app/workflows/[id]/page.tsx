@@ -3,12 +3,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { use as usePromise } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Play, ListChecks, Radio, AlertCircle, GitFork, Zap } from 'lucide-react';
 import { useOrg } from '@/context/OrgProvider';
 import { gqlRequest, GraphQLRequestError } from '@/lib/graphql';
 import { WORKFLOWS_QUERY, TRIGGER_WORKFLOW_RUN_MUTATION, RUN_HISTORY_QUERY } from '@/lib/queries';
 import { StepEditor } from '@/components/StepEditor';
 import { TriggerEditor } from '@/components/TriggerEditor';
 import { RunStatus } from '@/components/RunStatus';
+import { StatusBadge } from '@/components/StatusBadge';
+import { TRIGGER_TYPE_META } from '@/lib/stepMeta';
+import type { TriggerTypeName } from '@/lib/stepDefaults';
 
 interface WorkflowDetail {
   id: string;
@@ -68,7 +73,14 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
     }
   };
 
-  if (!currentOrg || !workflow) return <p className="text-sm text-neutral-500">loading...</p>;
+  if (!currentOrg || !workflow) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="shimmer h-6 w-64 rounded" />
+        <div className="shimmer h-40 w-full rounded-xl" />
+      </div>
+    );
+  }
 
   const isOwner = currentOrg.role === 'owner';
   const canEdit = currentOrg.role === 'owner' || currentOrg.role === 'editor';
@@ -76,26 +88,56 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div>
-      <Link href="/workflows" className="text-xs text-neutral-500 hover:text-neutral-300">
-        ← workflows
+      <Link
+        href="/workflows"
+        className="mb-3 inline-flex items-center gap-1 text-xs text-neutral-500 transition-colors hover:text-neutral-300"
+      >
+        <ArrowLeft className="h-3 w-3" /> workflows
       </Link>
-      <div className="flex items-center justify-between mt-2 mb-6">
-        <h1 className="text-lg font-semibold">{workflow.name}</h1>
+
+      <div className="mb-7 flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">{workflow.name}</h1>
+          {workflow.description && <p className="mt-1 text-sm text-neutral-500">{workflow.description}</p>}
+        </div>
         {canTrigger && (
-          <button
+          <motion.button
+            whileTap={{ scale: 0.96 }}
             onClick={runNow}
             disabled={triggering}
-            className="bg-emerald-700 hover:bg-emerald-600 rounded px-4 py-2 text-sm font-medium disabled:opacity-50"
+            className={`btn-primary flex shrink-0 items-center gap-2 rounded-xl px-5 py-2.5 text-sm disabled:opacity-60 ${triggering ? 'pulse-ring' : ''}`}
           >
-            {triggering ? 'starting...' : 'Run'}
-          </button>
+            {triggering ? (
+              <>
+                <Zap className="h-4 w-4 animate-pulse" /> Starting…
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4 fill-current" /> Run
+              </>
+            )}
+          </motion.button>
         )}
       </div>
-      {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-4 flex items-center gap-2 rounded-lg border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs text-red-300"
+          >
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <section>
-          <h2 className="text-sm font-semibold text-neutral-400 mb-2">Steps</h2>
+          <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <GitFork className="h-3.5 w-3.5" /> Steps
+          </h2>
           <StepEditor
             workflowId={workflow.id}
             orgId={currentOrg.id}
@@ -105,7 +147,9 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
             onChanged={load}
           />
 
-          <h2 className="text-sm font-semibold text-neutral-400 mb-2 mt-8">Triggers</h2>
+          <h2 className="mb-3 mt-8 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <Radio className="h-3.5 w-3.5" /> Triggers
+          </h2>
           <TriggerEditor
             workflowId={workflow.id}
             orgId={currentOrg.id}
@@ -116,37 +160,57 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
           />
         </section>
 
-        <section>
-          <h2 className="text-sm font-semibold text-neutral-400 mb-2">
+        <section className="lg:sticky lg:top-20 lg:self-start">
+          <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <ListChecks className="h-3.5 w-3.5" />
             {activeRunId ? 'Live run' : 'Run history'}
           </h2>
           {activeRunId ? (
             <>
-              <button onClick={() => setActiveRunId(null)} className="text-xs text-neutral-500 hover:text-neutral-300 mb-2">
-                ← back to history
+              <button
+                onClick={() => setActiveRunId(null)}
+                className="mb-3 flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300"
+              >
+                <ArrowLeft className="h-3 w-3" /> back to history
               </button>
               <RunStatus workflowRunId={activeRunId} canApprove={canTrigger} />
             </>
           ) : (
-            <ul className="flex flex-col gap-2">
-              {runHistory.map((run) => (
-                <li key={run.id}>
-                  <button
-                    onClick={() => setActiveRunId(run.id)}
-                    className="w-full text-left border border-neutral-800 rounded px-3 py-2 text-sm hover:border-neutral-600"
-                  >
-                    <div className="flex justify-between">
-                      <span>{run.status}</span>
-                      <span className="text-xs text-neutral-500">{run.trigger_type}</span>
-                    </div>
-                    {run.started_at && (
-                      <div className="text-xs text-neutral-500 mt-1">{new Date(run.started_at).toLocaleString()}</div>
-                    )}
-                  </button>
-                </li>
-              ))}
-              {runHistory.length === 0 && <p className="text-sm text-neutral-500">No runs yet.</p>}
-            </ul>
+            <div className="flex flex-col gap-2">
+              <AnimatePresence initial={false}>
+                {runHistory.map((run, i) => {
+                  const meta = TRIGGER_TYPE_META[run.trigger_type as TriggerTypeName];
+                  const TriggerIcon = meta?.icon;
+                  return (
+                    <motion.button
+                      key={run.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ delay: i * 0.02 }}
+                      onClick={() => setActiveRunId(run.id)}
+                      className="card card-hover flex items-center justify-between px-3.5 py-2.5 text-left"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {TriggerIcon && <TriggerIcon className="h-3.5 w-3.5 text-neutral-500" />}
+                        <div>
+                          <StatusBadge status={run.status} />
+                          {run.started_at && (
+                            <div className="mt-1 text-[11px] text-neutral-600">{new Date(run.started_at).toLocaleString()}</div>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-[11px] capitalize text-neutral-500">{run.trigger_type}</span>
+                    </motion.button>
+                  );
+                })}
+              </AnimatePresence>
+              {runHistory.length === 0 && (
+                <div className="card flex flex-col items-center gap-2 px-4 py-10 text-center">
+                  <p className="text-sm text-neutral-500">No runs yet.</p>
+                </div>
+              )}
+            </div>
           )}
         </section>
       </div>

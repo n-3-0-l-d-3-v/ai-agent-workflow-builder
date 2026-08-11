@@ -1,8 +1,12 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { User, Mail, Lock, ArrowRight, Info } from 'lucide-react';
 import { nhost } from '@/lib/nhost';
+import { AuthCard } from '@/components/AuthCard';
+import { FieldInput } from '@/components/FieldInput';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -28,48 +32,57 @@ export default function SignUpPage() {
       }
       router.push('/orgs');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'sign up failed');
+      setError(err instanceof Error ? err.message : 'Sign up failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-sm mx-auto mt-16">
-      <h1 className="text-lg font-semibold mb-6">Create account</h1>
+    <AuthCard
+      title="Create your account"
+      subtitle="Start building agent workflows"
+      footer={
+        <>
+          Already have an account?{' '}
+          <Link href="/sign-in" className="text-violet-300 hover:text-violet-200">
+            Sign in
+          </Link>
+        </>
+      }
+    >
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <input
-          placeholder="display name"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          className="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
-        />
-        <input
+        <FieldInput icon={User} placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+        <FieldInput
+          icon={Mail}
           type="email"
           required
-          placeholder="email"
+          placeholder="you@company.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
         />
-        <input
+        <FieldInput
+          icon={Lock}
           type="password"
           required
           minLength={8}
-          placeholder="password (min 8 chars)"
+          placeholder="Password (min 8 chars)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
         />
-        {error && <p className="text-sm text-amber-400">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-neutral-100 text-neutral-900 rounded px-3 py-2 text-sm font-medium disabled:opacity-50"
-        >
-          {loading ? 'creating account...' : 'sign up'}
+
+        {error && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-900/50 bg-amber-950/25 px-3 py-2 text-xs text-amber-300">
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            {error}
+          </div>
+        )}
+
+        <button type="submit" disabled={loading} className="btn-primary group mt-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm disabled:opacity-50">
+          {loading ? 'Creating account…' : 'Create account'}
+          {!loading && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
         </button>
       </form>
-    </div>
+    </AuthCard>
   );
 }

@@ -17,10 +17,8 @@ export const DEFAULT_STEP_CONFIG: Record<StepTypeName, unknown> = {
     temperature: 0.2,
   },
   http_request: {
-    url: 'https://httpbin.org/post',
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: { note: 'replace with a real API call' },
+    url: 'https://jsonplaceholder.typicode.com/todos/1',
+    method: 'GET',
   },
   db_write: {
     key: 'llm_result',

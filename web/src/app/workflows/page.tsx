@@ -2,9 +2,14 @@
 
 import { useEffect, useState, FormEvent } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ListTree, Plus, ArrowUpRight, Workflow as WorkflowIcon, Clock } from 'lucide-react';
 import { useOrg } from '@/context/OrgProvider';
 import { gqlRequest } from '@/lib/graphql';
 import { WORKFLOWS_QUERY, CREATE_WORKFLOW_MUTATION } from '@/lib/queries';
+import { StatusBadge } from '@/components/StatusBadge';
+import { STEP_TYPE_META } from '@/lib/stepMeta';
+import type { StepTypeName } from '@/lib/stepDefaults';
 
 interface WorkflowSummary {
   id: string;
@@ -17,14 +22,14 @@ interface WorkflowSummary {
   runs: { id: string; status: string; created_at: string }[];
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  succeeded: 'text-emerald-400',
-  failed: 'text-red-400',
-  paused: 'text-amber-400',
-  running: 'text-sky-400',
-  pending: 'text-neutral-400',
-  cancelled: 'text-neutral-500',
-};
+function WorkflowCardSkeleton() {
+  return (
+    <div className="card p-4">
+      <div className="shimmer mb-2 h-4 w-40 rounded" />
+      <div className="shimmer h-3 w-24 rounded" />
+    </div>
+  );
+}
 
 export default function WorkflowsPage() {
   const { currentOrg, isLoading: orgLoading } = useOrg();
@@ -62,9 +67,11 @@ export default function WorkflowsPage() {
   if (orgLoading) return null;
   if (!currentOrg) {
     return (
-      <p className="text-sm text-neutral-400">
-        No organization selected. <Link href="/orgs" className="underline">Create or join one</Link>.
-      </p>
+      <div className="card mx-auto mt-10 max-w-md p-6 text-center">
+        <p className="text-sm text-neutral-400">
+          No organization selected. <Link href="/orgs" className="text-violet-300 hover:text-violet-200">Create or join one</Link>.
+        </p>
+      </div>
     );
   }
 
@@ -72,57 +79,115 @@ export default function WorkflowsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-semibold">Workflows — {currentOrg.name}</h1>
+      <div className="mb-6 flex items-center gap-2.5">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400/20 to-violet-500/20">
+          <ListTree className="h-4.5 w-4.5 text-violet-300" />
+        </span>
+        <div>
+          <h1 className="text-lg font-semibold tracking-tight">Workflows</h1>
+          <p className="text-xs text-neutral-500">{currentOrg.name}</p>
+        </div>
       </div>
 
       {canEdit && (
-        <form onSubmit={onCreate} className="flex gap-2 mb-6">
+        <form onSubmit={onCreate} className="card mb-6 flex items-center gap-2 p-2">
           <input
             required
-            placeholder="new workflow name"
+            placeholder="New workflow name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="flex-1 bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
+            className="flex-1 bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-neutral-600"
           />
           <button
             type="submit"
             disabled={creating}
-            className="bg-neutral-100 text-neutral-900 rounded px-3 py-2 text-sm font-medium disabled:opacity-50"
+            className="btn-primary flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm disabled:opacity-50"
           >
-            {creating ? 'creating...' : 'new workflow'}
+            {creating ? (
+              'Creating…'
+            ) : (
+              <>
+                <Plus className="h-3.5 w-3.5" /> New workflow
+              </>
+            )}
           </button>
         </form>
       )}
 
       {loading ? (
-        <p className="text-sm text-neutral-500">loading...</p>
+        <div className="flex flex-col gap-3">
+          <WorkflowCardSkeleton />
+          <WorkflowCardSkeleton />
+        </div>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {workflows.map((wf) => {
-            const lastRun = wf.runs[0];
-            return (
-              <li key={wf.id}>
-                <Link
-                  href={`/workflows/${wf.id}`}
-                  className="flex items-center justify-between border border-neutral-800 rounded px-4 py-3 hover:border-neutral-600 transition-colors"
+        <div className="flex flex-col gap-3">
+          <AnimatePresence initial={false}>
+            {workflows.map((wf, i) => {
+              const lastRun = wf.runs[0];
+              const uniqueTypes = Array.from(new Set(wf.steps.map((s) => s.type))) as StepTypeName[];
+              return (
+                <motion.div
+                  key={wf.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.04 }}
                 >
-                  <div>
-                    <div className="text-sm font-medium">{wf.name}</div>
-                    <div className="text-xs text-neutral-500 mt-1">
-                      {wf.steps.length} steps · {wf.triggers.length} triggers
-                      {wf.avg_duration_seconds != null && ` · avg ${Math.round(wf.avg_duration_seconds)}s`}
+                  <Link href={`/workflows/${wf.id}`} className="card card-hover group flex items-center justify-between gap-4 p-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                        <WorkflowIcon className="h-4.5 w-4.5 text-neutral-400" />
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 text-sm font-medium text-neutral-100">
+                          {wf.name}
+                          <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-neutral-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                          {uniqueTypes.slice(0, 5).map((t) => {
+                            const meta = STEP_TYPE_META[t];
+                            if (!meta) return null;
+                            const Icon = meta.icon;
+                            return (
+                              <span
+                                key={t}
+                                className={`flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br ${meta.ring}`}
+                                title={meta.label}
+                              >
+                                <Icon className={`h-3 w-3 ${meta.color}`} />
+                              </span>
+                            );
+                          })}
+                          <span className="text-[11px] text-neutral-600">
+                            {wf.steps.length} steps · {wf.triggers.length} triggers
+                            {wf.avg_duration_seconds != null && (
+                              <span className="ml-1 inline-flex items-center gap-0.5">
+                                <Clock className="inline h-2.5 w-2.5" /> {Math.round(wf.avg_duration_seconds)}s avg
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className={`text-xs font-medium ${lastRun ? STATUS_COLORS[lastRun.status] : 'text-neutral-600'}`}>
-                    {lastRun ? lastRun.status : 'never run'}
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-          {workflows.length === 0 && <p className="text-sm text-neutral-500">No workflows yet.</p>}
-        </ul>
+                    <div className="shrink-0">
+                      {lastRun ? (
+                        <StatusBadge status={lastRun.status} />
+                      ) : (
+                        <span className="text-[11px] text-neutral-600">never run</span>
+                      )}
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+          {workflows.length === 0 && (
+            <div className="card flex flex-col items-center gap-2 px-4 py-14 text-center">
+              <WorkflowIcon className="h-6 w-6 text-neutral-600" />
+              <p className="text-sm text-neutral-500">No workflows yet.</p>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

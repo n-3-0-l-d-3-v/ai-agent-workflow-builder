@@ -88,6 +88,12 @@ export const DELETE_STEP_MUTATION = `
   }
 `;
 
+export const UPDATE_STEP_MUTATION = `
+  mutation UpdateStep($id: uuid!, $name: String!, $config: jsonb!) {
+    update_workflow_steps_by_pk(pk_columns: { id: $id }, _set: { name: $name, config: $config }) { id }
+  }
+`;
+
 // Swaps two steps' step_order via a temporary value so the intermediate
 // state never collides with the (workflow_id, step_order) unique
 // constraint. All three updates ride in a single request, so Hasura runs
