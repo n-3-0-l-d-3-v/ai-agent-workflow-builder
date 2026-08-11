@@ -104,21 +104,21 @@ export function TriggerEditor({
             return (
               <motion.div key={t.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="card p-3">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-2.5">
+                  <div className="flex min-w-0 items-start gap-2.5">
                     <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[var(--border)] text-[var(--muted)]">
                       <Icon className="h-3.5 w-3.5" />
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="mono text-sm text-neutral-200">{meta?.label ?? t.type}</div>
                       {t.type === 'webhook' && (
-                        <div className="mt-1.5 flex flex-col gap-1">
-                          <div className="flex items-center gap-1.5">
-                            <code className="mono truncate rounded bg-black/20 px-1.5 py-0.5 text-[10px] text-[var(--muted)]">
+                        <div className="mt-1.5 flex min-w-0 flex-col gap-1">
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <code className="mono min-w-0 truncate rounded bg-black/20 px-1.5 py-0.5 text-[10px] text-[var(--muted)]">
                               POST {webhookUrl}
                             </code>
                             <CopyButton text={webhookUrl} />
                           </div>
-                          <p className="text-[10px] text-[var(--muted-2)]">
+                          <p className="break-words text-[10px] text-[var(--muted-2)]">
                             header <code className="mono text-[var(--muted-2)]">x-webhook-signature</code>: HMAC-SHA256(body, webhook_secret)
                           </p>
                         </div>

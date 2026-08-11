@@ -218,3 +218,16 @@ renamed. Direct curl calls I constructed by hand to test the function
 assumption; only real calls routed through Hasura exposed it. Caught by
 comparing a captured request body (via `console.error` + the nhost
 dashboard's Functions logs) against what the handler expected.
+
+**`typeof` doesn't distinguish a `Buffer` from a plain object.**
+`functions/lib/parseBody.ts` checked `typeof body === 'object'` before
+checking `Buffer.isBuffer(body)`, but `typeof` on a `Buffer` is also
+`'object'` in JS — so Buffer bodies fell into the "already parsed" branch
+and were returned unparsed. This didn't fail consistently: nhost's
+function runtime sometimes hands a handler a pre-parsed object and
+sometimes a raw `Buffer`, depending on the invocation, so the same
+webhook call would succeed on one request and fail with a spurious
+"workflow_id is required" on the next. Intermittent failures with no
+code change in between are usually an input-shape assumption, not
+flakiness in the platform — fixed by checking `Buffer.isBuffer(body)`
+first, verified with five consecutive successful live runs afterward.

@@ -1,4 +1,4 @@
--- AI Agent Workflow Builder — core schema
+-- Dispatch — core schema
 -- Design notes live in docs/write-up.md. Summary of the choices made here:
 --
 --  * Every tenant-scoped table carries org_id directly (not just via a join
