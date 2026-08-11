@@ -61,6 +61,7 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
   const runNow = async () => {
     setTriggering(true);
     setError(null);
+    const priorLatestRunId = runHistory[0]?.id ?? null;
     try {
       const data = await gqlRequest<{ triggerWorkflowRun: { workflow_run_id: string; status: string } }>(
         TRIGGER_WORKFLOW_RUN_MUTATION,
@@ -69,7 +70,26 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
       setActiveRunId(data.triggerWorkflowRun.workflow_run_id);
       await load();
     } catch (err) {
-      setError(err instanceof GraphQLRequestError ? err.message : 'failed to trigger run');
+      // triggerWorkflowRun runs every step synchronously server-side before
+      // responding, which can outlast a gateway/proxy's own timeout -- the
+      // client sees a network error even though the run is still executing
+      // (or already finished) on the server. Rather than show a scary
+      // "failed" banner for a run that actually worked, poll briefly for a
+      // new run to show up before concluding it genuinely failed.
+      let recovered = false;
+      for (let attempt = 0; attempt < 6 && !recovered; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const historyData = await gqlRequest<{ workflow_runs: RunHistoryRow[] }>(RUN_HISTORY_QUERY, { workflowId }).catch(() => null);
+        const latest = historyData?.workflow_runs[0];
+        if (latest && latest.id !== priorLatestRunId) {
+          setRunHistory(historyData!.workflow_runs);
+          setActiveRunId(latest.id);
+          recovered = true;
+        }
+      }
+      if (!recovered) {
+        setError(err instanceof GraphQLRequestError ? err.message : 'failed to trigger run — the request timed out and no new run showed up');
+      }
     } finally {
       setTriggering(false);
     }
