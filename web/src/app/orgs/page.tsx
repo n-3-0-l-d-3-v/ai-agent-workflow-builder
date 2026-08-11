@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, ArrowRight, AlertCircle } from 'lucide-react';
+import { Plus, ArrowRight, AlertCircle, Users } from 'lucide-react';
 import { useOrg } from '@/context/OrgProvider';
 import { useRequireAuth } from '@/lib/useRequireAuth';
 import { gqlRequest } from '@/lib/graphql';
@@ -73,7 +74,17 @@ export default function OrgsPage() {
                   <span className="text-sm text-neutral-200">{org.name}</span>
                   {active && <span className="mono text-[10px] uppercase tracking-wide text-[var(--accent)]">current</span>}
                 </div>
-                <RoleBadge role={org.role} />
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={`/orgs/${org.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    title="manage members"
+                    className="rounded p-1 text-[var(--muted-2)] hover:bg-white/[0.05] hover:text-neutral-200"
+                  >
+                    <Users className="h-3.5 w-3.5" />
+                  </Link>
+                  <RoleBadge role={org.role} />
+                </div>
               </motion.button>
             );
           })}

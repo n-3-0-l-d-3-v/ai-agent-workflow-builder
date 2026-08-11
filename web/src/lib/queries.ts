@@ -174,6 +174,51 @@ export const WORKFLOW_RUN_SUBSCRIPTION = `
   }
 `;
 
+export const ORG_MEMBERS_QUERY = `
+  query OrgMembers($orgId: uuid!) {
+    org_members(where: { org_id: { _eq: $orgId } }, order_by: { created_at: asc }) {
+      id
+      role
+      created_at
+      user {
+        id
+        display_name
+        email
+      }
+    }
+  }
+`;
+
+export const FIND_USER_BY_EMAIL_QUERY = `
+  query FindUserByEmail($email: citext!) {
+    auth_users(where: { email: { _eq: $email } }, limit: 1) {
+      id
+      display_name
+      email
+    }
+  }
+`;
+
+export const INVITE_MEMBER_MUTATION = `
+  mutation InviteMember($orgId: uuid!, $userId: uuid!, $role: String!) {
+    insert_org_members_one(object: { org_id: $orgId, user_id: $userId, role: $role }) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_MEMBER_ROLE_MUTATION = `
+  mutation UpdateMemberRole($id: uuid!, $role: String!) {
+    update_org_members_by_pk(pk_columns: { id: $id }, _set: { role: $role }) { id }
+  }
+`;
+
+export const REMOVE_MEMBER_MUTATION = `
+  mutation RemoveMember($id: uuid!) {
+    delete_org_members_by_pk(id: $id) { id }
+  }
+`;
+
 export const RUN_HISTORY_QUERY = `
   query RunHistory($workflowId: uuid!) {
     workflow_runs(where: { workflow_id: { _eq: $workflowId } }, order_by: { created_at: desc }, limit: 10) {
