@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, ArrowRight, AlertCircle } from 'lucide-react';
 import { useOrg } from '@/context/OrgProvider';
+import { useRequireAuth } from '@/lib/useRequireAuth';
 import { gqlRequest } from '@/lib/graphql';
 import { CREATE_ORG_MUTATION } from '@/lib/queries';
 import { RoleBadge } from '@/components/RoleBadge';
@@ -17,6 +18,7 @@ function slugify(name: string): string {
 }
 
 export default function OrgsPage() {
+  const { userId } = useRequireAuth();
   const { orgs, currentOrg, refetch, setCurrentOrgId } = useOrg();
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +42,8 @@ export default function OrgsPage() {
       setCreating(false);
     }
   };
+
+  if (!userId) return null;
 
   return (
     <div className="mx-auto max-w-2xl">

@@ -18,7 +18,7 @@ export function AuthCard({
       <div className="mb-6">
         <span className="mono mb-4 flex items-center gap-1.5 text-xs text-[var(--muted)]">
           <span className="text-[var(--accent)]">❯</span>
-          workflows
+          dispatch
         </span>
         <h1 className="font-heading text-xl font-semibold tracking-tight text-[var(--foreground)]">{title}</h1>
         <p className="mt-1 text-sm text-[var(--muted)]">{subtitle}</p>

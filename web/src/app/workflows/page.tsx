@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, ArrowUpRight, Clock } from 'lucide-react';
 import { useOrg } from '@/context/OrgProvider';
+import { useRequireAuth } from '@/lib/useRequireAuth';
 import { gqlRequest } from '@/lib/graphql';
 import { WORKFLOWS_QUERY, CREATE_WORKFLOW_MUTATION } from '@/lib/queries';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -32,6 +33,7 @@ function WorkflowCardSkeleton() {
 }
 
 export default function WorkflowsPage() {
+  const { userId } = useRequireAuth();
   const { currentOrg, isLoading: orgLoading } = useOrg();
   const [workflows, setWorkflows] = useState<WorkflowSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,7 @@ export default function WorkflowsPage() {
     }
   };
 
-  if (orgLoading) return null;
+  if (!userId || orgLoading) return null;
   if (!currentOrg) {
     return (
       <div className="card mx-auto mt-10 max-w-md p-6 text-center">

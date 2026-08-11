@@ -1,6 +1,7 @@
-# AI Agent Workflow Builder
+# Dispatch
 
-A mini n8n purpose-built for chaining AI agent steps. Organizations build
+An AI agent workflow orchestrator — a mini n8n purpose-built for chaining AI
+agent steps. Organizations build
 workflows out of `llm_call`, `http_request`, `db_write`, `notify`,
 `conditional_branch`, and `approval_gate` steps; runs start manually, on a
 schedule, via a signed webhook, or off a database event; and every action

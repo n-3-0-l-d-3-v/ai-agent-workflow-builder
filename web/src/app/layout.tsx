@@ -22,8 +22,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Agent Workflow Builder",
-  description: "A mini n8n for chaining AI agent steps.",
+  title: "Dispatch",
+  description: "Org-scoped, role-gated AI agent workflow orchestration.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

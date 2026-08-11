@@ -43,7 +43,7 @@ export function TerminalDemo() {
         <span className="term-dot" />
         <span className="term-dot" />
         <span className="term-dot" />
-        <span className="mono ml-2 text-[11px] text-[var(--muted-2)]">workflows — zsh</span>
+        <span className="mono ml-2 text-[11px] text-[var(--muted-2)]">dispatch — zsh</span>
       </div>
       <div className="mono px-4 py-4 text-[12.5px] leading-[1.9] sm:text-[13px]">
         {SCRIPT.slice(0, visible).map((line, i) => {

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Play, ListChecks, Radio, AlertCircle, GitFork } from 'lucide-react';
 import { useOrg } from '@/context/OrgProvider';
+import { useRequireAuth } from '@/lib/useRequireAuth';
 import { gqlRequest, GraphQLRequestError } from '@/lib/graphql';
 import { WORKFLOWS_QUERY, TRIGGER_WORKFLOW_RUN_MUTATION, RUN_HISTORY_QUERY } from '@/lib/queries';
 import { StepEditor } from '@/components/StepEditor';
@@ -34,6 +35,7 @@ interface RunHistoryRow {
 
 export default function WorkflowDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: workflowId } = usePromise(params);
+  const { userId } = useRequireAuth();
   const { currentOrg } = useOrg();
   const [workflow, setWorkflow] = useState<WorkflowDetail | null>(null);
   const [runHistory, setRunHistory] = useState<RunHistoryRow[]>([]);
@@ -73,7 +75,7 @@ export default function WorkflowDetailPage({ params }: { params: Promise<{ id: s
     }
   };
 
-  if (!currentOrg || !workflow) {
+  if (!userId || !currentOrg || !workflow) {
     return (
       <div className="flex flex-col gap-3">
         <div className="skeleton h-6 w-64 rounded" />
